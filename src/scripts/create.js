@@ -1,10 +1,11 @@
 import { Command } from 'commander';
-import { createApiClient } from '@neondatabase/api-client';
+import { createNeonClient } from '@neon/sdk';
 import 'dotenv/config';
 
 const program = new Command();
-const neonApi = createApiClient({
+const neonApi = createNeonClient({
   apiKey: process.env.NEON_API_KEY,
+  throwOnError: true,
 });
 
 program.option('-n, --name <name>', 'name of the company').parse(process.argv);
@@ -15,17 +16,14 @@ if (options.name) {
   console.log(`Company Name: ${options.name}`);
   console.log(typeof options.name);
 
-  const response = await neonApi.createProject({
-    project: {
-      name: options.name,
-      pg_version: 16,
-      region_id: 'aws-us-east-1',
-      // org_id: '',
-    },
+  const project = await neonApi.projects.create({
+    name: options.name,
+    pg_version: 16,
+    region_id: 'aws-us-east-1',
+    // org_id: '',
   });
 
-  const { data } = await response;
-  console.log(data);
+  console.log(project);
 } else {
   console.log('No company name provided');
 }

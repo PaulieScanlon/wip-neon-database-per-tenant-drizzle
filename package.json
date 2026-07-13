@@ -14,7 +14,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@neondatabase/api-client": "^1.10.3",
+    "@neon/sdk": "^1.1.0",
     "@neondatabase/serverless": "^0.10.3",
     "commander": "^12.1.0",
     "dotenv": "^16.4.5",

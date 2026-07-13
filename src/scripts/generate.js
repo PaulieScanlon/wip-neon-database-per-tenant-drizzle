@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { execSync } from 'child_process';
-import { createApiClient } from '@neondatabase/api-client';
+import { createNeonClient } from '@neon/sdk';
 import { Octokit } from 'octokit';
 import 'dotenv/config';
 
@@ -9,8 +9,9 @@ import { drizzleConfig } from '../templates/drizzle-config.js';
 import { githubWorkflow } from '../templates/github-workflow.js';
 
 const octokit = new Octokit({ auth: process.env.PERSONAL_ACCESS_TOKEN });
-const neonApi = createApiClient({
+const neonApi = createNeonClient({
   apiKey: process.env.NEON_API_KEY,
+  throwOnError: true,
 });
 
 const repoOwner = 'PaulieScanlon';
@@ -31,25 +32,17 @@ let secrets = [];
     }
   );
 
-  const response = await neonApi.listProjects();
-
-  const {
-    data: { projects },
-  } = await response;
+  const projects = await neonApi.projects.list().all();
 
   await Promise.all(
     projects.map(async (project) => {
       const { id, name } = project;
 
-      const response = await neonApi.getConnectionUri({
+      const uri = await neonApi.postgres.connectionString({
         projectId: id,
-        database_name: 'neondb',
-        role_name: 'neondb_owner',
+        databaseName: 'neondb',
+        roleName: 'neondb_owner',
       });
-
-      const {
-        data: { uri },
-      } = await response;
 
       const safeName = name.replace(/\s+/g, '-').toLowerCase();
       const path = `configs/${safeName}`;
